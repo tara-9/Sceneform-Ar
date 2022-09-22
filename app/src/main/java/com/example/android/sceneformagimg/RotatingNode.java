@@ -1,7 +1,9 @@
 package com.example.android.sceneformagimg;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.util.Log;
+import android.view.animation.AnimationSet;
 import android.view.animation.LinearInterpolator;
 
 import com.google.ar.sceneform.FrameTime;
@@ -36,32 +38,12 @@ class RotatingNode extends TransformableNode {
 
     @Override
     public void onActivate() {
-//        ObjectAnimator objectAnimator = new ObjectAnimator();
-//        Quaternion[] orientations = new Quaternion[4];
-//        // Rotation to apply first, to tilt its axis.
-//        Quaternion baseOrientation = Quaternion.axisAngle(new Vector3(1.0f, 0f, 0.0f), 10f);
-//        for (int i = 0; i < orientations.length; i++) {
-//            float angle = i * 360 / (orientations.length - 1);
-//            Quaternion orientation = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), angle);
-//            orientations[i] = orientation;
-////            orientations[i] = Quaternion.multiply(baseOrientation, orientation);
-//        }
-//        objectAnimator.setTarget(this);
-//        objectAnimator.setDuration((long) (1000 * 360 / (90)));
-//        objectAnimator.setPropertyName("localRotation");
-//        objectAnimator.setObjectValues((Object[]) orientations);
-//        objectAnimator.setEvaluator(new QuaternionEvaluator());
-//        objectAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-//        objectAnimator.setRepeatMode(ObjectAnimator.RESTART);
-//        objectAnimator.setInterpolator(new LinearInterpolator());
-//        objectAnimator.setAutoCancel(true);
-//        mObjectAnimator = objectAnimator;
-//        mObjectAnimator.start();
-        translate();
-
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(translate(), rotate());
+        animatorSet.start();
     }
 
-    private void translate() {
+    private ObjectAnimator translate() {
         ObjectAnimator objectAnimator = new ObjectAnimator();
         Vector3[] sides = new Vector3[2];
         sides[0] = new Vector3(0.08f, -0.08f,0f);
@@ -75,9 +57,30 @@ class RotatingNode extends TransformableNode {
         objectAnimator.setRepeatMode(ObjectAnimator.RESTART);
         objectAnimator.setInterpolator(new LinearInterpolator());
         objectAnimator.setAutoCancel(true);
-        mObjectAnimator = objectAnimator;
-        mObjectAnimator.start();
+        return objectAnimator;
+    }
 
+    private ObjectAnimator rotate() {
+        ObjectAnimator objectAnimator = new ObjectAnimator();
+        Quaternion[] orientations = new Quaternion[4];
+        // Rotation to apply first, to tilt its axis.
+        Quaternion baseOrientation = Quaternion.axisAngle(new Vector3(1.0f, 0f, 0.0f), 10f);
+        for (int i = 0; i < orientations.length; i++) {
+            float angle = i * 360 / (orientations.length - 1);
+            Quaternion orientation = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), angle);
+            orientations[i] = orientation;
+//            orientations[i] = Quaternion.multiply(baseOrientation, orientation);
+        }
+        objectAnimator.setTarget(this);
+        objectAnimator.setDuration((long) (1000 * 360 / (90)));
+        objectAnimator.setPropertyName("localRotation");
+        objectAnimator.setObjectValues((Object[]) orientations);
+        objectAnimator.setEvaluator(new QuaternionEvaluator());
+        objectAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        objectAnimator.setRepeatMode(ObjectAnimator.RESTART);
+        objectAnimator.setInterpolator(new LinearInterpolator());
+        objectAnimator.setAutoCancel(true);
+        return objectAnimator;
     }
 
 

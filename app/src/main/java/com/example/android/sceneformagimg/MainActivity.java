@@ -4,6 +4,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,6 +31,7 @@ import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
+import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.BaseArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
@@ -275,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements
                 AnchorNode anchorNode = new AnchorNode(augmentedImage.createAnchor(augmentedImage.getCenterPose()));
                 anchorNode.setWorldScale(new Vector3(0.5f, 0.5f, 0.5f));
                 arFragment.getArSceneView().getScene().addChild(anchorNode);
-                futures.add(whiteCube
+                futures.add(redCube
                         .thenAccept(cubeModel -> {
                             TransformableNode modelNode = new RotatingNode(arFragment.getTransformationSystem());
                             modelNode.onUpdate(null);
@@ -318,9 +320,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private void createCubeRenderbale() {
          whiteCube = MaterialFactory.makeOpaqueWithColor(this, new Color(255,255,255))
-                .thenApply(material -> ShapeFactory.makeCube(new Vector3(0.08f, 0.08f, 0.08f), new Vector3(0,0f,0), material));
+                .thenApply(material -> ShapeFactory.makeCube(new Vector3(0.1f, 0.08f, 0.08f), new Vector3(0,0f,0), material));
          redCube = MaterialFactory.makeOpaqueWithColor(this, new Color(255,0,0))
-                 .thenApply(material -> ShapeFactory.makeCube(new Vector3(0.05f, 0.05f, 0.05f), new Vector3(0,0,0), material));
+                 .thenApply(material -> ShapeFactory.makeCube(new Vector3(0.1f, 0.1f, 0.1f), new Vector3(0,0,0), material));
 
     }
 }
