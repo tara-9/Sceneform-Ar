@@ -1,19 +1,13 @@
 package com.example.android.sceneformagimg;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentOnAttachListener;
@@ -28,17 +22,16 @@ import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Sceneform;
-import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
+import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.EngineInstance;
-import com.google.ar.sceneform.rendering.ExternalTexture;
 import com.google.ar.sceneform.rendering.Material;
+import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
-import com.google.ar.sceneform.rendering.RenderableInstance;
+import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.BaseArFragment;
-import com.google.ar.sceneform.ux.InstructionsController;
 import com.google.ar.sceneform.ux.TransformableNode;
 
 import java.io.IOException;
@@ -61,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements
     private Renderable plainVideoModel;
     private Material plainVideoMaterial;
     private MediaPlayer mediaPlayer;
+
+    private CompletableFuture<ModelRenderable> redCube ;
+    private CompletableFuture<ModelRenderable> whiteCube;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements
                         .commit();
             }
         }
+        createCubeRenderbale();
 
 //        if(Sceneform.isSupported(this)) {
 //            // .glb models can be loaded at runtime when needed or when app starts
@@ -278,16 +275,11 @@ public class MainActivity extends AppCompatActivity implements
                 AnchorNode anchorNode = new AnchorNode(augmentedImage.createAnchor(augmentedImage.getCenterPose()));
                 anchorNode.setWorldScale(new Vector3(0.5f, 0.5f, 0.5f));
                 arFragment.getArSceneView().getScene().addChild(anchorNode);
-                futures.add(ModelRenderable.builder()
-                        .setSource(this, Uri.parse("models/Rabbit.glb"))
-                        .setIsFilamentGltf(true)
-                        .build()
-                        .thenAccept(rabbitModel -> {
-                            TransformableNode modelNode = new TransformableNode(arFragment.getTransformationSystem());
-                            modelNode.setRenderable(rabbitModel);
-//                            Vector3 anchorLocal = anchorNode.getLocalPosition();
-//                            modelNode.setLocalPosition(new Vector3(0.0f, 0.0f,0.0f));
-//                            modelNode.setLookDirection(Vector3.forward());
+                futures.add(whiteCube
+                        .thenAccept(cubeModel -> {
+                            TransformableNode modelNode = new RotatingNode(arFragment.getTransformationSystem());
+                            modelNode.onUpdate(null);
+                            modelNode.setRenderable(cubeModel);
                             anchorNode.addChild(modelNode);
                         })
                         .exceptionally(
@@ -295,6 +287,18 @@ public class MainActivity extends AppCompatActivity implements
                                     Toast.makeText(this, "Unable to load rabbit model", Toast.LENGTH_LONG).show();
                                     return null;
                                 }));
+//                futures.add(redCube
+//                        .thenAccept(cubeModel -> {
+//                            TransformableNode modelNode = new TransformableNode(arFragment.getTransformationSystem());
+//                            modelNode.setRenderable(cubeModel);
+//                            modelNode.setWorldPosition(new Vector3(0.2f, 0.1f,0.1f));
+//                            anchorNode.addChild(modelNode);
+//                        })
+//                        .exceptionally(
+//                                throwable -> {
+//                                    Toast.makeText(this, "Unable to load rabbit model", Toast.LENGTH_LONG).show();
+//                                    return null;
+//                                }));
                 Toast.makeText(this, "Percy Dictated", Toast.LENGTH_LONG).show();
             }
         }
@@ -309,6 +313,14 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, "Error while loading image db");
             // The Augmented Image database could not be deserialized; handle this error appropriately.
         }
+
+    }
+
+    private void createCubeRenderbale() {
+         whiteCube = MaterialFactory.makeOpaqueWithColor(this, new Color(255,255,255))
+                .thenApply(material -> ShapeFactory.makeCube(new Vector3(0.08f, 0.08f, 0.08f), new Vector3(0,0f,0), material));
+         redCube = MaterialFactory.makeOpaqueWithColor(this, new Color(255,0,0))
+                 .thenApply(material -> ShapeFactory.makeCube(new Vector3(0.05f, 0.05f, 0.05f), new Vector3(0,0,0), material));
 
     }
 }
